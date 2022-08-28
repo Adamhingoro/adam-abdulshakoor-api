@@ -1,0 +1,20 @@
+<div class="row">
+    <div class="col s3"></div>
+    <form class="col s6">
+        <div class="row">
+            you are looking at post id <b>{{post_id}}</b></div>
+        <div class="row">
+            <div class="input-field col s8">
+                <h4><small>Title: </small>{{ post_title }}</h4>
+            </div>
+            <div class="input-field col s4">
+                <a class="waves-effect waves-light btn" [routerLink]="['/']"><i class="material-icons left">arrow_left</i>Back</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s8">
+                <p><small>Body: </small>{{ post_data }}</p>
+            </div>
+        </div>
+    </form>
+</div>

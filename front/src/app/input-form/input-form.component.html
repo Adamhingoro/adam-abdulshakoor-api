@@ -1,0 +1,15 @@
+<div class="row">
+    <div class="col s3"></div>
+    <form class="col s6">
+        <div class="row">Enter the <strong>Post ID</strong> below and click send. It will send the HTTP Request to the server</div>
+        <div class="row">
+            <div class="input-field col s8">
+                <input id="post_id_form_control" type="number" [formControl]="post_id_form_control" >
+                <label for="post_id">Post ID</label>
+            </div>
+            <div class="input-field col s4">
+                <a class="waves-effect waves-light btn" (click)="MoveToPostsPage()"><i class="material-icons left">arrow_upward</i>Send</a>
+            </div>
+        </div>
+    </form>
+</div>

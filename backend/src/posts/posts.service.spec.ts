@@ -1,7 +1,7 @@
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppController } from './app.controller';
-import { UserPosts } from './interfaces/posts.interface';
-import { PostsService } from './posts/posts.service';
+import { UserPosts } from 'src/interfaces/posts.interface';
+import { PostsService } from './posts.service';
 
 const mockData: UserPosts = [
   {
@@ -66,27 +66,114 @@ const mockData: UserPosts = [
   },
 ]
 
-describe('AppController', () => {
-  let appController: AppController;
+describe('PostsService', () => {
+  let service: PostsService;
 
   beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
-      controllers: [AppController],
+    const module: TestingModule = await Test.createTestingModule({
       providers: [PostsService],
     }).compile();
 
-    appController = app.get<AppController>(AppController);
+    service = module.get<PostsService>(PostsService);
   });
 
-  describe('root', () => {
-    it('should return "All posts"', () => {
-      expect(appController.getAll()).toStrictEqual(mockData);
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+
+  it('should return posts all posts', () => {
+    const result = service.getAll();
+    expect(result).toStrictEqual(mockData);
+  });
+
+  it('should return single post', () => {
+    const post_id = mockData[0].id;
+    const result = service.findOne(post_id);
+    expect(result).toStrictEqual(mockData[0]);
+  });
+
+  it('should return posts of a user', () => {
+    const user_id = 1;
+    const result = service.findByUserId(user_id);
+    expect(result).toStrictEqual(mockData);
+  });
+
+  it('should return error for invalid user', () => {
+    try {
+      service.findByUserId(99)
+      expect(false).toBe(true);
+    } catch (error) {
+      expect(error).toBeInstanceOf(NotFoundException)
+    }
+  });
+
+  it('should create a new post', () => {
+    const new_post_id = service.create({
+      title: "new post title",
+      body: "new post body",
+      userId: 2,
     });
-    it('should return "One posts"', () => {
-      expect(appController.getOne({ id: 1 })).toStrictEqual(mockData[0]);
-    });
-    it('should return "All posts of user"', () => {
-      expect(appController.getByUser({uid: 1})).toStrictEqual(mockData);
+    const newPost = service.findOne(new_post_id);
+    expect(newPost).toStrictEqual({
+      title: "new post title",
+      body: "new post body",
+      userId: 2,
+      id: new_post_id
     });
   });
+
+  it('should delete a single post', () => {
+    const post_id = mockData[0].id;
+    try {
+      service.delete(post_id);
+      service.findOne(post_id);
+      expect(false).toBe(true);
+    } catch (error) {
+      expect(error).toBeInstanceOf(NotFoundException)
+    }
+  });
+
+  it('should not delete a already deleted post', () => {
+    const post_id = mockData[0].id;
+    try {
+      service.delete(post_id); // deleting 
+      service.delete(post_id); // deleting again
+      expect(false).toBe(true);
+    } catch (error) {
+      expect(error).toBeInstanceOf(NotFoundException)
+    }
+  });
+
+  it('should update a single post', () => {
+    const post = mockData[1];
+    service.update(post.id, {
+      body: "updated",
+      userId: 3,
+      title: 'updated',
+    });
+    const updatedPost = service.findOne(post.id);
+    expect(updatedPost).toStrictEqual({
+      id: post.id,
+      body: "updated",
+      userId: 3,
+      title: 'updated',
+    });
+  });
+
+  it('should not update a already deleted or missing post', () => {
+    const post = mockData[0];
+    try {
+      service.delete(post.id);
+      service.update(post.id, {
+        body: "updated",
+        userId: 3,
+        title: 'updated',
+      });
+      expect(false).toBe(true);
+    } catch (error) {
+      expect(error).toBeInstanceOf(NotFoundException)
+    }
+  });
+
+
 });
